@@ -1,34 +1,70 @@
 #!/bin/bash
 
+do_cmd () {
+
+	echo -e "${@}"
+	date
+	eval "${@}"
+	CMD_STATUS=$?
+	echo -e "\n -- status: ${CMD_STATUS}\n\n"
+	date
+	return "${CMD_STATUS}"
+
+}
+
+
 BN=$(basename "${0}")
+SRC_FILE=./rdpwrap.ini
 
 case "${BN}" in
 	split-ini-file.sh)
+		# remove any formerly existing INI file sections
 		rm -f -- \[*
+
+		# split INI file sections to individual files
 		/usr/bin/awk \
-			'/^\[/ \
-				{ ofn=$1 } \
+			'/^\[/ { ofn=$1 }
 				ofn {
 						print > ofn
 					   	system("sleep 0.0000000001")
-					}' \
-			rdpwrap.ini
-		for filex in $(ls -rt \[*)
+					}' "${SRC_FILE}"
+
+		# remove \r from filenames if created above with them
+		for filex in \[*
 		do
-			mv "${filex}" "$(echo "${filex}" | tr -d '\r')"
+			filex2=$(echo "${filex}" | tr -d '\r')
+			[[ "${filex}" = "${filex2}" ]] || {
+				do_cmd mv -v "${filex}" "${filex2}"
+			}
 		done
 		;;
 	rebuild-ini-file.sh)
 		# reconstruct INI file
 		(
-		echo -e '; RDP Wrapper Library configuration\r'
-		echo -e '; Do not modify without special knowledge\r'
-		echo -e '\r'
+		cat <<-EOF
+			; RDP Wrapper Library configuration
+			; Do not modify without special knowledge
 
-		for x in $(ls -rt -- ./\[*)
+		EOF
+
+		for x in ./\[[MPS]*
 		do
 			cat "${x}"
-		done) > ./rdpwrap.ini.new
+		done
+
+		# the following "ls" is to ensure ordering of INI sections...
+		for x in $(ls -av -- ./\[[0-9]*)
+		do
+			cat "${x}"
+		done
+		)| tr -d '' > ./"${SRC_FILE}".new
+
+		# update "Updated=" entry
+		sed -i 's/Updated=.*$/Updated='"$(date +%Y-%m-%d)"'/' "${SRC_FILE}".new
+
+		# cleanup
+		rm -- ./\[[MPS]*
+		rm -- ./\[[0-9]*
 		;;
 esac
 
