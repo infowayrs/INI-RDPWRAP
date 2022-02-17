@@ -9,11 +9,7 @@ split_ini () {
 	# - also squeeze blank lines
 	WRK_SRC_FILE=$(mktemp)
 	tr -d '' < "${SRC_FILE}" > "${WRK_SRC_FILE}"
-	/usr/bin/awk \
-		'/^\[/ { ofn=$1 }
-			ofn {
-					print > ofn
-				}' "${WRK_SRC_FILE}"
+	/usr/bin/awk '/^\[/ { ofn=$1 } ofn { print > ofn }' "${WRK_SRC_FILE}"
 	[[ -f ${WRK_SRC_FILE} ]] && rm "${WRK_SRC_FILE}"
 }
 
@@ -21,8 +17,13 @@ rebuild_ini () {
 	# new version will end in alpha char, a through j
 	# - if it was just a date without alpha version then start with 'a'
 	#   dtherwise increment alphabetically up to "j"
+	#
+	# Should have split out files for rebuilding and it should
+	# include the "[Main]" file that has the last updated detail.
+	#
+	MAIN_FILE="[Main]"
 	DATEX=$(date +%Y-%m-%d)
-	LAST_UPDATED_LINE=$(grep ^Updated= "${SRC_FILE}"|tr -d '\r')
+	LAST_UPDATED_LINE=$(grep ^Updated= "${MAIN_FILE}"|tr -d '\r')
 	LAST_UPDATED_LINE_VER=${LAST_UPDATED_LINE:(-1)}
 	VER=a
 	NEW_UPDATED_LINE="Updated=${DATEX}${VER}"
