@@ -31,11 +31,15 @@ rebuild_ini () {
 		# Last updated line should have alpha version for date
 		if [[ ${LAST_UPDATED_LINE_VER} = [[:alpha:]] ]]
 		then
-			# increment alphabetic ver
-			VER=$(echo "${LAST_UPDATED_LINE_VER}"|tr "a-j" "b-k")
-			[[ "${VER}" = "k" ]] && {
-				echo doing nothing as too many versions already...
-				exit 2
+			OLD_DATE_PART=${LAST_UPDATED_LINE:8:10}
+			# if the date part is the same, then we increment the alpha
+			[[ ${OLD_DATE_PART} = "${DATEX}" ]] && {
+				# increment alphabetic ver
+				VER=$(echo "${LAST_UPDATED_LINE_VER}"|tr "a-j" "b-k")
+				[[ "${VER}" = "k" ]] && {
+					echo doing nothing as too many versions already...
+					exit 2
+				}
 			}
 		else
 			echo bad version char is not alphabetic
