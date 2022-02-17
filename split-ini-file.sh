@@ -22,7 +22,7 @@ rebuild_ini () {
 	# - if it was just a date without alpha version then start with 'a'
 	#   dtherwise increment alphabetically up to "j"
 	DATEX=$(date +%Y-%m-%d)
-	LAST_UPDATED_LINE=$(grep ^Updated= rdpwrap.ini|tr -d '\r')
+	LAST_UPDATED_LINE=$(grep ^Updated= "${SRC_FILE}"|tr -d '\r')
 	LAST_UPDATED_LINE_VER=${LAST_UPDATED_LINE:(-1)}
 	VER=a
 	NEW_UPDATED_LINE="Updated=${DATEX}${VER}"
