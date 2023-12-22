@@ -1,2 +1,4 @@
 # INI-RDPWRAP
-#These are the ini files and some dlls from the w10 1809 compiles tested in x64 and working
+- Shell scripts to split and rebuild ini file
+- rdpwrap.ini -- with all latest known INI sections
+- registry hives that may be useful IF Windows and/or an AV product removes them.
